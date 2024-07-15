@@ -12,8 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - warp-ubuntu-latest-x64-4x
-          - warp-ubuntu-latest-arm64-4x
+          - ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -24,8 +23,8 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GH_TOKEN }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build the docker image
         env:
@@ -37,16 +36,16 @@ jobs:
           docker build \
             -f ./docker/Dockerfile \
             --progress=plain \
-            -t "${{ github.repository_owner }}/documenso-$BUILD_PLATFORM:latest" \
-            -t "${{ github.repository_owner }}/documenso-$BUILD_PLATFORM:$GIT_SHA" \
-            -t "${{ github.repository_owner }}/documenso-$BUILD_PLATFORM:$APP_VERSION" \
-            -t "ghcr.io/${{ github.repository_owner }}/documenso-$BUILD_PLATFORM:latest" \
-            -t "ghcr.io/${{ github.repository_owner }}/documenso-$BUILD_PLATFORM:$GIT_SHA" \
-            -t "ghcr.io/${{ github.repository_owner }}/documenso-$BUILD_PLATFORM:$APP_VERSION" \
+            -t "rainson12/documenso-$BUILD_PLATFORM:latest" \
+            -t "rainson12/documenso-$BUILD_PLATFORM:$GIT_SHA" \
+            -t "rainson12/documenso-$BUILD_PLATFORM:$APP_VERSION" \
+            -t "ghcr.io/rainson12/documenso-$BUILD_PLATFORM:latest" \
+            -t "ghcr.io/rainson12/documenso-$BUILD_PLATFORM:$GIT_SHA" \
+            -t "ghcr.io/rainson12/documenso-$BUILD_PLATFORM:$APP_VERSION" \
             .
 
       - name: Push the docker image to GitHub Container Registry
-        run: docker push --all-tags "ghcr.io/${{ github.repository_owner }}/documenso-$BUILD_PLATFORM"
+        run: docker push --all-tags "ghcr.io/rainson12/documenso-$BUILD_PLATFORM"
         env:
           BUILD_PLATFORM: ${{ matrix.os == 'warp-ubuntu-latest-arm64-4x' && 'arm64' || 'amd64' }}
 
@@ -64,8 +63,8 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GH_TOKEN }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create and push Github Container Registry manifest
         run: |
@@ -73,20 +72,20 @@ jobs:
           GIT_SHA="$(git rev-parse HEAD)"
 
           docker manifest create \
-            ghcr.io/${{ github.repository_owner }}/documenso:latest \
-            --amend ghcr.io/${{ github.repository_owner }}/documenso-amd64:latest \
-            --amend ghcr.io/${{ github.repository_owner }}/documenso-arm64:latest \
+            ghcr.io/rainson12/documenso:latest \
+            --amend ghcr.io/rainson12/documenso-amd64:latest \
+            --amend ghcr.io/rainson12/documenso-arm64:latest \
 
           docker manifest create \
             ghcr.io/documenso/documenso:$GIT_SHA \
-            --amend ghcr.io/${{ github.repository_owner }}/documenso-amd64:$GIT_SHA \
-            --amend ghcr.io/${{ github.repository_owner }}/documenso-arm64:$GIT_SHA \
+            --amend ghcr.io/rainson12/documenso-amd64:$GIT_SHA \
+            --amend ghcr.io/rainson12/documenso-arm64:$GIT_SHA \
 
           docker manifest create \
-            ghcr.io/${{ github.repository_owner }}/documenso:$APP_VERSION \
-            --amend ghcr.io/${{ github.repository_owner }}/documenso-amd64:$APP_VERSION \
-            --amend ghcr.io/${{ github.repository_owner }}/documenso-arm64:$APP_VERSION \
+            ghcr.io/rainson12/documenso:$APP_VERSION \
+            --amend ghcr.io/rainson12/documenso-amd64:$APP_VERSION \
+            --amend ghcr.io/rainson12/documenso-arm64:$APP_VERSION \
 
-          docker manifest push ghcr.io/${{ github.repository_owner }}/documenso:latest
-          docker manifest push ghcr.io/${{ github.repository_owner }}/documenso:$GIT_SHA
-          docker manifest push ghcr.io/${{ github.repository_owner }}/documenso:$APP_VERSION
+          docker manifest push ghcr.io/rainson12/documenso:latest
+          docker manifest push ghcr.io/rainson12/documenso:$GIT_SHA
+          docker manifest push ghcr.io/rainson12/documenso:$APP_VERSION
